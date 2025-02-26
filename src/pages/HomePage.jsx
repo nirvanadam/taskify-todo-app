@@ -93,7 +93,7 @@ function HomePage() {
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
             placeholder="Find your tasks"
-            className="w-full rounded-xl bg-transparent py-3 pl-10 pr-3 focus:outline-textColor-accent"
+            className="text-medium w-full rounded-xl bg-transparent py-3 pl-10 pr-3 placeholder:font-medium focus:outline-textColor-accent"
           />
         </div>
       ) : isCompletedTasksOpen ? (
@@ -191,7 +191,7 @@ function HomePage() {
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
               placeholder="Find your tasks"
-              className="w-full rounded-xl bg-transparent py-3 pl-10 pr-3 placeholder:text-gray-300 focus:outline-textColor-accent"
+              className="text-medium w-full rounded-xl bg-transparent py-3 pl-10 pr-3 placeholder:font-medium placeholder:text-gray-300 focus:outline-textColor-accent"
             />
           </div>
         </div>
@@ -203,14 +203,16 @@ function HomePage() {
         {isCompletedTasksOpen && completedTasks.length === 0 && (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-3 text-gray-500">
             <img src={no_result} alt="" className="w-20" />
-            <p className="text-textColor-secondary">You have no task listed.</p>
+            <p className="text-center font-medium text-textColor-secondary">
+              You have no task listed.
+            </p>
           </div>
         )}
 
         {!isCompletedTasksOpen && filteredTasks.length === 0 ? (
           <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-3 text-gray-500">
             <img src={no_result} alt="" className="w-20" />
-            <p className="text-textColor-secondary">
+            <p className="text-center font-medium text-textColor-secondary">
               {isSearchBarOpen
                 ? "No result found."
                 : "You have no task listed."}
@@ -222,7 +224,7 @@ function HomePage() {
                 className="mt-2 flex items-center justify-between gap-1 rounded-xl bg-blue-50 px-4 py-3"
               >
                 <Plus size={20} color="#007FFF" />
-                <h1 className="font-medium text-textColor-accent">
+                <h1 className="font-semibold text-textColor-accent">
                   Create Task
                 </h1>
               </button>

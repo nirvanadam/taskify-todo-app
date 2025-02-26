@@ -46,7 +46,7 @@ function CreateTaskForm() {
           name="note"
           id="note"
           placeholder="Add a note..."
-          className="h-[200px] w-full font-medium focus:outline-none"
+          className="h-[500px] w-full font-medium focus:outline-none"
         ></textarea>
       </div>
 

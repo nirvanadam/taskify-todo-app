@@ -7,17 +7,13 @@ import MainLayout from "./layouts/MainLayout";
 import { Provider } from "react-redux";
 import { store } from "./redux/store";
 import HomePage from "./pages/HomePage";
-import DonePage from "./pages/DonePage";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <MainLayout />, // Bungkus dengan MainLayout
     errorElement: <ErrorPage />,
-    children: [
-      { path: "/", element: <HomePage /> },
-      { path: "/done", element: <DonePage /> },
-    ],
+    children: [{ path: "/", element: <HomePage /> }],
   },
 ]);
 
