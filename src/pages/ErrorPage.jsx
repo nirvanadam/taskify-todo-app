@@ -1,5 +1,4 @@
 import React from "react";
-import error from "/images/error-illust.svg";
 import { Link } from "react-router-dom";
 import { House } from "lucide-react";
 

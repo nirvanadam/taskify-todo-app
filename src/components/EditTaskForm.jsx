@@ -50,7 +50,7 @@ function EditTaskForm({ id }) {
             setUpdatedNote(event.target.value);
           }}
           placeholder="Add a note..."
-          className="h-[500px] w-full font-medium focus:outline-none"
+          className="h-[500px] w-full font-medium focus:outline-none lg:h-[300px]"
         ></textarea>
       </div>
 
