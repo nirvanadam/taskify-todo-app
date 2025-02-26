@@ -25,41 +25,43 @@ function CreateTaskForm() {
     <form
       action=""
       onSubmit={handleAddTask}
-      className="bg-white border-t flex flex-col gap-9 px-6 py-7 border-gray-200 fixed left-0 z-10 bottom-0 h-[50vh] w-full rounded-t-2xl shadow-md"
+      className="fixed bottom-0 left-0 z-10 flex h-fit w-full flex-col gap-9 rounded-t-3xl border-t border-gray-200 bg-white px-6 py-7 lg:absolute lg:left-1/2 lg:top-1/2 lg:max-w-2xl lg:-translate-x-1/2 lg:-translate-y-1/2 lg:rounded-3xl"
     >
-      <div className="flex gap-5 items-center">
+      <div className="flex items-center gap-5">
         <Square size={26} className="text-textColor-secondary" />
         <input
           type="text"
           name="title"
           id="title"
           required
+          autoFocus
           placeholder="What's on your mind?"
-          className="w-full"
+          className="w-full text-2xl font-semibold focus:outline-none"
         />
       </div>
 
-      <div className="flex gap-5 ">
+      <div className="flex gap-5">
         <Pencil size={26} className="text-textColor-secondary" />
         <textarea
           name="note"
           id="note"
           placeholder="Add a note..."
-          className="w-full h-[200px]"
+          className="h-[200px] w-full font-medium focus:outline-none"
         ></textarea>
       </div>
 
-      <div className="flex justify-between">
+      <div className="flex justify-between gap-3">
         <button
+          type="button"
           onClick={() => dispatch(toggleModalCreate())}
-          className="rounded px-3 py-2 bg-red-500 text-white  font-medium"
+          className="w-full rounded bg-red-500 px-3 py-2 font-semibold text-white"
         >
           Cancel
         </button>
 
         <button
           type="submit"
-          className="text-white bg-textColor-accent px-3 py-2 rounded font-medium"
+          className="w-full rounded bg-textColor-accent px-3 py-2 font-semibold text-white"
         >
           Create
         </button>

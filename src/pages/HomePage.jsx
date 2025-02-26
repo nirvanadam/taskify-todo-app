@@ -1,190 +1,328 @@
 import React, { useEffect, useState } from "react";
-import { Ellipsis, Pencil, Square } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+
+// Icons
+import { Ellipsis, Plus, Search, Square, SquarePlus } from "lucide-react";
 import no_result from "/icons/no_result.svg";
 import editIcon from "/icons/edit.svg";
 import deleteIcon from "/icons/delete.svg";
+import logo from "/icons/logo.svg";
+
+// Components
+import CreateTaskForm from "../components/CreateTaskForm";
+import EditTaskForm from "../components/EditTaskForm";
+
+// Actions
+import { toggleModalEdit } from "../redux/slices/modalEditSlice";
+import {
+  completeTask,
+  toggleCompletedTasks,
+  toggleConfirmModal,
+  toggleTaskList,
+} from "../redux/slices/taskSlice";
+import { toggleModalCreate } from "../redux/slices/modalCreateSlice";
+import ConfirmModal from "../components/ConfirmModal";
+import SuccessModal from "../components/SuccessModal";
 
 function HomePage() {
-  const [tasks, setTasks] = useState([]);
-  const [isShowCreateTask, setIsShowCreateTask] = useState(false);
-  const [selectedTaskIndex, setSelectedTaskIndex] = useState(null);
-  const [isShowEditTask, setIsShowEditTask] = useState(false);
+  const dispatch = useDispatch();
+  const tasksData = useSelector((state) => state.tasks.tasksData);
+  const [searchTerm, setSearchTerm] = useState("");
+  const filteredTasks = tasksData.filter((task) =>
+    task.title.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
-  // Load data dari local storage saat halaman pertama kali di-load
+  const isSearchBarOpen = useSelector((state) => state.tasks.isSearchBarOpen);
+  const isModalCreateOpen = useSelector(
+    (state) => state.modalCreate.isModalCreateOpen,
+  );
+  const isModalEditOpen = useSelector(
+    (state) => state.modalEdit.isModalEditOpen,
+  );
+
+  const isCompletedTasksOpen = useSelector(
+    (state) => state.tasks.isCompletedTasksOpen,
+  );
+
+  const isConfirmModalOpen = useSelector(
+    (state) => state.tasks.isConfirmModalOpen,
+  );
+
+  const activeButton = useSelector((state) => state.tasks.activeButton);
+
+  const isSuccessModalOpen = useSelector(
+    (state) => state.tasks.isSuccessModalOpen,
+  );
+
+  const completedTasks = tasksData.filter((task) => task.done);
+
+  const [selectedTask, setSelectedTask] = useState(null);
+
+  const toggleOption = (id) => {
+    setSelectedTask(selectedTask === id ? null : id);
+  };
+
+  const handleCompleteTask = (id) => {
+    dispatch(completeTask(id));
+  };
+
   useEffect(() => {
-    const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
-    setTasks(storedTasks);
-  }, []);
+    if (!isSearchBarOpen) {
+      setSearchTerm("");
+    }
+  }, [isSearchBarOpen]);
 
-  const handleAddTask = (event) => {
-    const newTask = {
-      title: event.target.title.value,
-      note: event.target.note.value,
-      done: false,
-    };
-
-    const storedTasks = JSON.parse(localStorage.getItem("tasks")) || [];
-    const updatedTasks = [...storedTasks, newTask];
-
-    localStorage.setItem("tasks", JSON.stringify(updatedTasks));
-    setTasks(updatedTasks);
-    setIsShowCreateTask(false);
-  };
-
-  const toggleOption = (index) => {
-    setSelectedTaskIndex(selectedTaskIndex === index ? null : index);
-    setIsShowEditTask(false);
-  };
-
-  const toggleEditTask = () => {
-    setIsShowEditTask(!isShowEditTask);
-  };
+  useEffect(() => {
+    setSelectedTask(null);
+  }, [isCompletedTasksOpen]);
 
   return (
-    <div className=" pt-9">
-      <header className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold ">
-          Welcome, <span className="text-textColor-accent">Adam</span>!
-        </h1>
+    <div className={`relative pt-9`}>
+      {isSearchBarOpen ? (
+        <div className={`relative rounded-xl bg-background-secondary`}>
+          <label
+            htmlFor="search"
+            className="absolute left-3 top-1/2 -translate-y-1/2"
+          >
+            <Search size={18} color="#007FFF" className="" />
+          </label>
+          <input
+            type="text"
+            name="search"
+            id="search"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Find your tasks"
+            className="w-full rounded-xl bg-transparent py-3 pl-10 pr-3 focus:outline-textColor-accent"
+          />
+        </div>
+      ) : isCompletedTasksOpen ? (
+        <div className="flex items-center justify-between lg:hidden">
+          <h1 className="text-xl font-semibold">Completed Tasks</h1>
+          {completedTasks.length > 0 && (
+            <button
+              type="button"
+              onClick={() => dispatch(toggleConfirmModal("all"))}
+              className="text flex items-center gap-1 rounded-xl bg-red-500 px-3 py-2 font-semibold text-white"
+            >
+              Delete All
+            </button>
+          )}
+        </div>
+      ) : (
+        <header className="flex flex-col gap-1">
+          <h1 className="text-xl font-semibold">
+            Welcome, <span className="text-textColor-accent">Adam</span>!
+          </h1>
 
-        {tasks.length === 0 ? (
-          <p className="text-base text-textColor-secondary">
-            Create tasks to achieve more.
-          </p>
+          {searchTerm === "" && (
+            <p className="text-base text-textColor-secondary">
+              You’ve got {filteredTasks.length - completedTasks.length} tasks to
+              do.
+            </p>
+          )}
+        </header>
+      )}
+
+      <div className="hidden justify-between lg:flex">
+        {isCompletedTasksOpen ? (
+          completedTasks.length > 0 ? (
+            <button
+              type="button"
+              onClick={() => dispatch(toggleConfirmModal("all"))}
+              className="text flex items-center gap-1 rounded-xl bg-red-500 px-3 py-1 text-sm font-semibold text-white"
+            >
+              Delete All
+            </button>
+          ) : (
+            <div className=""></div>
+          )
         ) : (
-          <p className="text-base text-textColor-secondary">
-            You’ve got {tasks.length} tasks to do.
-          </p>
+          <button
+            type="button"
+            onClick={() => dispatch(toggleModalCreate())}
+            className={`mt-5 flex items-center gap-3 text-gray-400`}
+          >
+            <SquarePlus size={24} className="text-gray-300" />
+            <h1 className="text-sm font-semibold">Add new task...</h1>
+          </button>
         )}
-      </header>
+
+        <div className="flex gap-5">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => dispatch(toggleTaskList())}
+              className={`${
+                activeButton === "taskList"
+                  ? "bg-textColor-accent text-white"
+                  : "border border-gray-200 text-gray-500"
+              } flex items-center gap-1 rounded-xl px-3 py-2 font-semibold`}
+            >
+              <h1 className="text-sm font-semibold">All</h1>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => dispatch(toggleCompletedTasks())}
+              className={`${
+                activeButton === "completedTasks"
+                  ? "bg-textColor-accent text-white"
+                  : "border border-gray-200 text-gray-500"
+              } flex items-center gap-1 rounded-xl px-3 py-2 font-semibold`}
+            >
+              <h1 className="text-sm font-semibold">Done</h1>
+            </button>
+          </div>
+
+          <div
+            className={`${isCompletedTasksOpen && "hidden"} relative w-[250px] rounded-xl bg-background-secondary`}
+          >
+            <label
+              htmlFor="search"
+              className="absolute left-3 top-1/2 -translate-y-1/2"
+            >
+              <Search size={18} color="#007FFF" className="" />
+            </label>
+            <input
+              type="text"
+              name="search"
+              id="search"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Find your tasks"
+              className="w-full rounded-xl bg-transparent py-3 pl-10 pr-3 placeholder:text-gray-300 focus:outline-textColor-accent"
+            />
+          </div>
+        </div>
+      </div>
 
       <section
-        className={`${
-          tasks.length === 0 && "justify-center items-center"
-        } mt-7 flex flex-col gap-4 h-[calc(76vh-90px)] b-yellow-400 overflow-y-auto`}
+        className={`b-yellow-400 relative mt-7 flex h-[calc(74vh-90px)] flex-col gap-4 overflow-y-auto lg:h-[69vh]`}
       >
-        {tasks.length === 0 ? (
-          <div className="text-gray-500 flex flex-col gap-3">
+        {isCompletedTasksOpen && completedTasks.length === 0 && (
+          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-3 text-gray-500">
             <img src={no_result} alt="" className="w-20" />
-            <p className="text-textColor-secondary">No result found.</p>
+            <p className="text-textColor-secondary">You have no task listed.</p>
+          </div>
+        )}
+
+        {!isCompletedTasksOpen && filteredTasks.length === 0 ? (
+          <div className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-3 text-gray-500">
+            <img src={no_result} alt="" className="w-20" />
+            <p className="text-textColor-secondary">
+              {isSearchBarOpen
+                ? "No result found."
+                : "You have no task listed."}
+            </p>
+
+            {!isSearchBarOpen && (
+              <button
+                onClick={() => dispatch(toggleModalCreate())}
+                className="mt-2 flex items-center justify-between gap-1 rounded-xl bg-blue-50 px-4 py-3"
+              >
+                <Plus size={20} color="#007FFF" />
+                <h1 className="font-medium text-textColor-accent">
+                  Create Task
+                </h1>
+              </button>
+            )}
           </div>
         ) : (
-          tasks.map((task, index) => {
-            return (
-              <div
-                key={index}
-                className="bg-background-secondary rounded-2xl p-4 grid grid-cols-[0.5fr_4fr_1fr] gap-5"
-              >
-                <button type="button" className="self-start">
-                  <Square size={26} className="text-textColor-secondary" />
-                </button>
-
-                <div className="flex flex-col gap-3">
-                  <h1 className="font-medium">{task.title}</h1>
-                  <p className="text-sm hyphens-auto text-textColor-secondary">
-                    {task.note}
-                  </p>
-                </div>
-
-                <div className="flex flex-col justify-center items-center self-start justify-self-end gap-3">
+          (isCompletedTasksOpen ? completedTasks : filteredTasks).map(
+            (task, index) => {
+              return (
+                <div
+                  key={index}
+                  className="grid grid-cols-[auto_4fr_1fr] gap-5 rounded-2xl bg-background-secondary p-4"
+                >
                   <button
                     type="button"
-                    onClick={() => toggleOption(index)}
-                    className="self-start "
+                    onClick={() => handleCompleteTask(task.id)}
+                    className="w-fit self-start"
                   >
-                    <Ellipsis size={26} className="text-textColor-secondary" />
+                    {task.done ? (
+                      <img src={logo} alt="" className="w-6" />
+                    ) : (
+                      <Square className="w-6 text-gray-300" />
+                    )}
                   </button>
 
-                  {selectedTaskIndex === index && (
-                    <div className="flex flex-col gap-5">
-                      <button type="button" onClick={toggleEditTask}>
-                        <img src={editIcon} alt="Edit" />
-                      </button>
+                  <div className="flex flex-col gap-3">
+                    <h1
+                      className={`${
+                        task.done && "text-gray-500 line-through"
+                      } text-lg font-semibold`}
+                    >
+                      {task.title}
+                    </h1>
+                    <p
+                      className={`${
+                        task.done && "line-through"
+                      } hyphens-auto text-sm text-textColor-secondary`}
+                    >
+                      {task.note}
+                    </p>
+                  </div>
 
-                      <button type="button">
+                  <div className="flex flex-col items-center justify-center gap-3 self-start justify-self-end">
+                    {isCompletedTasksOpen ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedTask(
+                            selectedTask === task.id ? null : task.id,
+                          );
+                          dispatch(toggleConfirmModal());
+                        }}
+                      >
                         <img src={deleteIcon} alt="Delete" />
                       </button>
-                    </div>
-                  )}
+                    ) : (
+                      <button
+                        onClick={() => toggleOption(task.id)}
+                        type="button"
+                        disabled={isModalEditOpen ? true : false}
+                        className="self-start"
+                      >
+                        <Ellipsis
+                          size={26}
+                          className="text-textColor-secondary"
+                        />
+                      </button>
+                    )}
+
+                    {selectedTask === task.id && (
+                      <div className="flex flex-col gap-5">
+                        <button
+                          type="button"
+                          disabled={isModalEditOpen ? true : false}
+                          onClick={() => dispatch(toggleModalEdit())}
+                        >
+                          <img src={editIcon} alt="Edit" />
+                        </button>
+
+                        <button
+                          type="button"
+                          disabled={isModalEditOpen ? true : false}
+                          onClick={() => dispatch(toggleConfirmModal())}
+                        >
+                          <img src={deleteIcon} alt="Delete" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-            );
-          })
+              );
+            },
+          )
         )}
       </section>
 
-      {isShowCreateTask && (
-        <form
-          action=""
-          onSubmit={handleAddTask}
-          className="bg-white border-t flex flex-col gap-9 px-6 py-7 border-gray-200 fixed left-0 z-10 bottom-0 h-[50vh] w-full rounded-t-2xl shadow-md"
-        >
-          <div className="flex gap-5 items-center">
-            <Square size={26} className="text-textColor-secondary" />
-            <input
-              type="text"
-              name="title"
-              id="title"
-              required
-              placeholder="What's on your mind?"
-              className="w-full"
-            />
-          </div>
-
-          <div className="flex gap-5 ">
-            <Pencil size={26} className="text-textColor-secondary" />
-            <textarea
-              name="note"
-              id="note"
-              placeholder="Add a note..."
-              className="w-full h-[200px]"
-            ></textarea>
-          </div>
-
-          <button type="submit" className="text-textColor-accent font-medium">
-            Create
-          </button>
-        </form>
-      )}
-
-      {isShowEditTask && (
-        <form
-          action=""
-          onSubmit={handleAddTask}
-          className="bg-white border-t flex flex-col gap-9 px-6 py-7 border-gray-200 fixed left-0 z-10 bottom-0 h-[50vh] w-full rounded-t-2xl shadow-md"
-        >
-          <div className="flex gap-5 items-center">
-            <Square size={26} className="text-textColor-secondary" />
-            <input
-              type="text"
-              name="title"
-              id="title"
-              value={tasks[selectedTaskIndex].title}
-              required
-              placeholder="What's on your mind?"
-              className="w-full"
-            />
-          </div>
-
-          <div className="flex gap-5 ">
-            <Pencil size={26} className="text-textColor-secondary" />
-            <textarea
-              name="note"
-              id="note"
-              value={tasks[selectedTaskIndex].note}
-              placeholder="Add a note..."
-              className="w-full h-[200px]"
-            ></textarea>
-          </div>
-
-          <button
-            type="submit"
-            className="bg-textColor-accent text-white rounded self-end px-4 py-2 w-fit text-xl font-medium"
-          >
-            Save
-          </button>
-        </form>
-      )}
+      {isModalCreateOpen && <CreateTaskForm />}
+      {isModalEditOpen && <EditTaskForm id={selectedTask} />}
+      {isConfirmModalOpen && <ConfirmModal id={selectedTask} />}
+      {isSuccessModalOpen && <SuccessModal />}
     </div>
   );
 }

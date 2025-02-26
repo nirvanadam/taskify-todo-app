@@ -1,4 +1,4 @@
-import { CirclePlus, LayoutList, Search, SquareCheckBig } from "lucide-react";
+import { LayoutList, Search, SquareCheckBig, SquarePlus } from "lucide-react";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -16,7 +16,7 @@ function Navbar() {
   const activeButton = useSelector((state) => state.tasks.activeButton);
 
   return (
-    <div className="fixed left-0 bottom-0 flex justify-evenly items-center border-t bg-white h-[90px] border-gray-200 py-4 w-full">
+    <div className="fixed left-0 bottom-0 flex justify-evenly items-center lg:hidden border-t bg-white h-[90px] border-gray-200 py-4 w-full ">
       <button
         type="button"
         onClick={() => dispatch(toggleTaskList())}
@@ -33,7 +33,7 @@ function Navbar() {
         onClick={() => dispatch(toggleModalCreate())}
         className={`flex flex-col text-gray-500 items-center gap-1`}
       >
-        <CirclePlus size={24} />
+        <SquarePlus size={24} />
         <h1 className="text-sm font-medium">Create</h1>
       </button>
 
